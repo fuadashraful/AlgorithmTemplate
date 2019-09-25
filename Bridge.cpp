@@ -1,194 +1,117 @@
 #include<bits/stdc++.h>
-
-/***
+#define ll long long int
+#define pb push_back
+#define _FasterIO  ios_base::sync_with_stdio(false);  cin.tie(0); cout.tie(0);
+#define inf (1<<30)
+/*
  Author: Fuad Ashraful Mehmet
  University of Asia Pacific
- created :25 Sept 2019 10.58 am
- Category : Articulation Point (dfs)
- Problem:  https://www.spoj.com/problems/EC_P/
-
-***/
+ created :24 sept 2019 10.58 am
+ Category :  Bridge (dfs)
+ Problem: uva 796
+*/
 
 using namespace std;
-int n,m,g,cs=1;
-const int N=1005;
-vector<int>graph[N];
-int parent[N],low[N],dis[N];
-bitset<N>visit;
-vector<pair<int,int> >ans;
+//int row[]= {-1,0,1,0};
+//int col[]= {0,-1,0,1};
+//int row [] = {+1,-1,+0,+0,-1,-1,+1,+1}; /// array for eight direction
 
-inline int getInt()
+static const int unvisited=-1;
+
+/// variable declearation part
+
+vector<vector<int> >graph;
+vector<int>parent;
+vector<int>discover;
+vector<int>low;
+int globalTime,m;
+vector<pair<int,int> >bridge;
+
+
+void dfs(int node)
 {
 
-    char ch=getchar();
-    int num,sign=1;
-
-    for(; ch<'0'||ch>'9'; ch=getchar())
-        if(ch=='-')
-            sign=-1;
-
-    for(num=0; ch>='0'&&ch<='9'; ch=getchar())
-    {
-        ch-='0';
-        num=num*10+ch;
-    }
-
-
-    return num*sign;
-} /// end
-
-
-void   dfs1(int node)
-{
-
-    visit[node]=true;
-    dis[node]=g;
-    low[node]=g++;
-
+    discover[node]=globalTime;
+    low[node]=globalTime++;
 
     for(auto x:graph[node])
     {
-        if(parent[node]==x)
-            continue;
 
-        if(false==visit[x])
+
+        if(unvisited==discover[x])
         {
-
             parent[x]=node;
-            dfs1(x);
-            low[node]=min(low[node],low[x]);
-        }
-        else
-        {
-            low[node]=min(low[node],dis[x]);
-        }
-    }
+            dfs(x);
 
-} /// end func
-
-void dfs2(int node)
-{
-
-    visit[node]=true;
-
-    for(auto x:graph[node])
-    {
-        if(visit[x]==false)
-        {
-
-            if(dis[node]<low[x])
+            if(low[x]>discover[node])
             {
-                if(node>x)
-                ans.push_back({x,node});
-                else
-                ans.push_back({node,x});
+                bridge.pb(make_pair(min(x,node),max(x,node)));
             }
 
-
-            dfs2(x);
+            low[node]=min(low[node],low[x]);
         }
-    }
-} /// .. end function
-
-
-void FindArticluationPoint()
-{
-    cin>>n>>m;
-    for(int i=1; i<=n; ++i)
-    {
-        graph[i].clear();
-        parent[i]=0;
-        low[i]=0;
-        dis[i]=0;
-    }
-
-
-    int u,v;
-    for(int i=1; i<=m; ++i)
-    {
-        cin>>u>>v;
-        graph[u].push_back(v);
-        graph[v].push_back(u);
-    }
-
-    visit.reset();
-
-    g=1;
-    for(int i=1; i<=n; ++i)
-    {
-        if(false==visit[i])
+        else if(x!=parent[node])
         {
-            dfs1(i);
+
+            low[node]=min(low[node],discover[x]);
         }
     }
-
-
-    ans.clear();
-    visit.reset();
-
-    for(int i=1; i<=n; ++i)
-    {
-        if(false==visit[i])
-        {
-            dfs2(i);
-        }
-    }
-
-} /// end func
-
-bool comp(const pair<int,int> &a,const pair<int,int> &b)
-{
-
-    if(a.first==b.first)
-        return a.second<b.second;
-    return a.first<b.first;
-
-} /// end func
-
-void PrintAnswer()
-{
-
-    sort(ans.begin(),ans.end(),comp);
-
-    cout<<"Caso #"<<cs++<<endl;
-    if(ans.size()==0)
-    {
-        cout<<"Sin bloqueos"<<endl;
-        return;
-    }
-    /*
-      cout<<"low values are "<<endl;
-        for(int i=1;i<=n;++i)
-        {
-            cout<<low[i]<<" ";
-        }
-
-        cout<<endl;
-    */
-
-    cout<<ans.size()<<endl;
-    for(auto x:ans)
-    {
-        cout<<x.first<<" "<<x.second<<endl;
-    }
-} /// end
-
+} /// ... end function
 int main()
 {
 
-    ios_base::sync_with_stdio(false);
-    cin.tie(0);
-    cout.tie(0);
+    _FasterIO
+//    freopen("input.txt","r",stdin);
+//    freopen("output.txt","w",stdout);
 
-
- //   freopen("input.txt","r",stdin);
-
-    int tc;
-    cin>>tc;
-    while(tc--)
+    int n;
+    while(cin>>n)
     {
-        FindArticluationPoint();
-        PrintAnswer();
+
+        /// init variable
+        graph.clear();
+        graph.resize(n);
+        parent.clear();
+        parent.resize(n,unvisited);
+        discover.clear();
+        discover.resize(n,unvisited);
+        low.clear();
+        low.resize(n,unvisited);
+        bridge.clear();
+        globalTime=1;
+        /// end init all variable
+
+           for(int i=0;i<n;++i)
+           {
+               int u,node,v;
+               char temp;
+               cin>>u;
+               cin>>temp>>node>>temp;
+
+
+               for(int j=0;j<node;++j)
+               {
+                   cin>>v;
+                   graph[u].push_back(v);
+                   graph[v].push_back(u);
+               }
+           }
+
+        for(int i=0; i<n; ++i)
+        {
+
+            if(discover[i]==unvisited)
+            {
+                dfs(i);
+            }
+        }
+
+        sort(bridge.begin(),bridge.end());
+        cout<<bridge.size()<<" critical links"<<endl;
+
+        for(auto x:bridge)
+            cout<<x.first<<" - "<<x.second<<endl;
+        cout<<endl;
 
     }
 
