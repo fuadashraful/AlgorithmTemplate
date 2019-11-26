@@ -8,3 +8,5 @@
 string using hash function . Sample problem is lightoj : 1255 - Substring Frequency
 
 5. SQRTdecompose is to find count of number A[i] l<=i<=r and A[i]>=c where c is a given number 
+
+6. Segment tree lazyPropagration is added to find sum between [l,r] and update between [l,r] with log(n) time
