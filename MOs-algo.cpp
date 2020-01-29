@@ -1,102 +1,98 @@
 /*
-  Ashraful Islam
+  Ashraful Islam Mehmet
   University of Asia Pacific
   Category : MO'S Algorithm
-  Problem :DQuery (SPOJ)
+  problem:lightoj 1188 fastqueries
  
 */
 #include<bits/stdc++.h>
-#define ll long long int
  
-const int N=1e6+5;
-int n,m,q;
-int frequency[N];
-int block;
 using namespace std;
-int A[30005];
-int currentAns;
-int finalAns[200005];
- 
-struct node
-{
-    int l,r,pos;
+int tc,n,k,m,cs=1;
+typedef long long ll;
+const int N=1e5+5;
+int A[N],ans[N],cnt[N];
+int block,curAns;
+struct Data{
+ int l,r,pos;
 };
-vector<node>query;
-bool cmp(const node &a,const node &b)
+Data q[50003];
+ 
+bool cmp(Data x, Data y)
 {
-    if(a.l/block!=b.l/block)
-        return a.l<b.l;
-    return a.r<b.r;
-}/// end fun
-void Remove(int idx)
-{
-    frequency[A[idx]]-=1;
-    if(frequency[A[idx]]==0)
-        currentAns--;
+    if((x.l/block)==(y.l/block))
+        return x.r<y.r;
+   return x.l/block<y.l/block;
 }
-void Add(int idx)
+ 
+ 
+void add(int num)
 {
-    frequency[A[idx]]++;
- 
-    if(frequency[A[idx]]==1)
-        currentAns++;
- 
-} ///end
-void processQuery()
+    cnt[A[num]]++;
+    if(cnt[A[num]]==1)curAns++;
+}
+void Remove(int num)
 {
- 
-    int curL=0,curR=0;
- 
-    for(int i=0; i<q; ++i)
-    {
- 
-        int L=query[i].l;
-        int R=query[i].r;
-      //  cout<<"l r "<<L<<" "<<R<<endl;
-        while(curR<R)
-        {
-            ++curR;
-            Add(curR);
-        }
-        while(curR>R)
-        {
-            Remove(curR);
-            curR--;
-        }
-        while(curL<L)
-        {
-            Remove(curL);
-            curL++;
-        }
-        while(curL>L)
-        {
-            curL--;
-            Add(curL);
-        }
-        finalAns[query[i].pos]=currentAns;
-       // cout<<"current L  R "<<curL<<" "<<curR<<endl;
-        // cout<<"ans "<<currentAns<<endl;
-    }
-    for(int i=1; i<=q; ++i)cout<<finalAns[i]<<endl;
-} /// end func
+    cnt[A[num]]--;
+    if(cnt[A[num]]==0)curAns--;
+}
 int main()
 {
-    ios_base::sync_with_stdio(false);
-    cin.tie(0);
    // freopen("input.txt","r",stdin);
-    cin>>n;
-    currentAns=0;
-    for(int i=1; i<=n; ++i)cin>>A[i];
-    cin>>q;
-    int u,v;
-    for(int i=1; i<=q; ++i)
+    scanf("%d",&tc);
+    while(tc--)
     {
-        cin>>u>>v;
-        query.push_back({u,v,i});
-    }
-
-    block=sqrt(30000);
-    sort(query.begin(),query.end(),cmp);
-    processQuery();
+        scanf("%d %d",&n,&m);
+        block=sqrt(n);
+ 
+        for(int i=0;i<n;++i)
+            scanf("%d",&A[i]);
+        int x,y;
+        for(int i=0;i<m;++i)
+        {
+            scanf("%d %d",&x,&y);
+           // cout<<"x y "<<x<<" "<<y<<endl;
+            x--; y--;
+            q[i].l=x;
+            q[i].r=y;
+            q[i].pos=i;
+        }
+        sort(q,q+m,cmp);
+        curAns=0;
+        int cl=0,cr=0;
+        memset(cnt,0,sizeof cnt);
+ 
+        for(int i=0;i<m;++i)
+        {
+            x=q[i].l;
+            y=q[i].r;
+            while(cl<x)
+            {
+                Remove(cl);
+                cl++;
+            }
+            while(cl>x)
+            {
+                cl--;
+                add(cl);
+            }
+            while(cr<=y)
+            {
+                add(cr);
+                cr++;
+            }
+            while(cr>y+1)
+            {
+                Remove(cr-1);
+                cr--;
+            }
+            ans[q[i].pos]=curAns;
+//            cout<<"cx cy "<<cl<<" "<<cy<<end;
+        } /// end query
+ 
+        printf("Case %d:\n",cs++);
+        for(int i=0;i<m;++i)
+            printf("%d\n",ans[i]);
+    }/// end case
     return 0;
-} /// end func
+}
