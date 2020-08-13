@@ -1,110 +1,142 @@
-/*************
- Author :Fuad Ashraful
+/*
+ this->author = Fuad Ashraful Mehmet, CSE-UAP
  category: Segment Tree (lazy Propagration)
- date:27 Nov 2019
- Problem : Lightoj 1164 - Horrible Queries 
-*********/
+ Problem : 1135 - Count the Multiples of 3
+*/
 #include<bits/stdc++.h>
-#define ll long long int
-#define ull unsigned long long
-#define ones(x) __builtin_popcount(x)
-#define mem(a,b) memset(a,b,sizeof(a))
-#define debug(x) cerr<<"at "<<__LINE__<<" value is "<<x<<endl
+#define forn(i,n) for(int i=0;i<(int)n;++i)
+#define all(o) (o).begin(),(o).end()
+#define dbg(o)  cerr<<"at "<<__LINE__<<" response = "<<o<<endl;
 using namespace std;
-const ll mod=1000000007;
+
 const int N=1e5+5;
-int n,q,m,cs=1,len,Q,tc=1;
-string f;
-inline void scan(int &x)
+typedef  long long ll;
+int n,m,k,cs=1;
+
+int tree[3][N*4];
+int lazy[N*4];
+
+void build(int l,int r,int nd=1)
 {
-  scanf("%d",&x);
-} /// end func
+      if(l==r)
+      {
+            lazy[nd]=0;
+            tree[0][nd]=1;
+            tree[1][nd]=tree[2][nd]=0;
+            return;
+      }
 
-struct Node
+      int mid=(l+r)>>1;
+      build(l,mid,nd<<1);
+      build(mid+1,r,nd<<1|1);
+      lazy[nd]=0;
+
+      forn(i,3)
+      {
+            tree[i][nd]=tree[i][nd<<1]+tree[i][nd<<1|1];
+      }
+      return;
+}
+
+void push_down(int nd,int val)
 {
-  ll lazy;
-  ll sum;
-}segment[N*4];
+      vector<int>temp;
+      for(int i=0;i<3;++i)
+      {
+            int p=i-val;
+            if(p<0)p+=3;
+            temp.push_back(tree[p][nd]);
+      }
+      for(int i=0;i<3;++i)
+      {
+            tree[i][nd]=temp[i];
+      }
 
-void update(int l,int r,int x,int y,int node,int val)
-{ 
-
-  if(l>y||r<x||l>r)
-  return;
-
-  if(l>=x&&r<=y)
-  {
-    segment[node].lazy+=val;
-
-    segment[node].sum+=(r-l+1)*val;
-    return;
-  } // end
-
-  int mid=(l+r)>>1;
-  int left=(node<<1);
-  int right=left+1;
-  update(l,mid,x,y,left,val);
-  update(mid+1,r,x,y,right,val);
-
-  segment[node].sum=segment[left].sum+segment[right].sum+(ll)segment[node].lazy*(r-l+1);
-  return;
-
-} /// end func
-
-ll Query(int l,int r,int x,int y,int node,int p)
+      lazy[nd]+=val;
+}
+int query(int l,int r,int x,int y,int nd=1)
 {
+      if(l>y or r<x)return 0;
+      if(l>=x and r<=y)
+      {
+            return tree[0][nd];
+      }
+      
+      if(lazy[nd])
+      {
+            push_down(nd<<1,lazy[nd]%3);
+            push_down(nd<<1|1,lazy[nd]%3);
+            lazy[nd]=0;
+      }
+      
+      int mid=(l+r)>>1;
+      int r1=query(l,mid,x,y,nd<<1);
+      int r2=query(mid+1,r,x,y,nd<<1|1);
+      for(int i=0;i<3;++i)tree[i][nd]=tree[i][nd<<1]+tree[i][nd<<1|1];
+      return r1+r2;
+}
 
-  if(l>y||r<x||l>r)
-  return 0;
-  if(l>=x&&r<=y)
-  {
-    return segment[node].sum+(ll)(r-l+1)*p;
-  }
+void update(int l,int r,int x,int y,int nd=1)
+{
+      if(l>y or r<x)return;
+      if(l>=x and r<=y)
+      {
+            lazy[nd]++;
+            int temp=tree[2][nd];
+            tree[2][nd]=tree[1][nd];
+            tree[1][nd]=tree[0][nd];
+            tree[0][nd]=temp;
+            return;
+      }
 
-  int mid=(l+r)>>1;
-  int left=(node<<1);
-  int right=left+1;
+      if(lazy[nd])
+      {
+            push_down(nd<<1,lazy[nd]%3);
+            push_down(nd<<1|1,lazy[nd]%3);
+            lazy[nd]=0;
+      }
 
+      int mid=(l+r)>>1;
 
-  ll ans=Query(l,mid,x,y,left,p+segment[node].lazy)+Query(mid+1,r,x,y,right,p+segment[node].lazy);
+      update(l,mid,x,y,nd<<1);
+      update(mid+1,r,x,y,nd<<1|1);
 
-  return ans;
+      for(int i=0;i<3;++i)tree[i][nd]=tree[i][nd<<1]+tree[i][nd<<1|1];
+      return;
+}
 
-} /// end func
+void HalfDead()
+{
+      scanf("%d%d",&n,&m);
+      build(1,n);
+
+      printf("Case %d:\n",cs++);
+
+      int c,x,y;
+      while(m--)
+      {
+            scanf("%d%d%d",&c,&x,&y);
+            x++;
+            y++;
+            if(c)
+            {
+                  printf("%d\n",query(1,n,x,y));
+            }
+            else
+            {
+                  update(1,n,x,y);
+            }
+            
+      }
+}
 int main()
 {
-      
-        ios_base::sync_with_stdio(false);   
-       // freopen("input.txt","r",stdin);
-      // freopen("output.txt","w",stdout);
-
-      for(scan(tc);tc--;)
+      //ios_base::sync_with_stdio(0); cin.tie(nullptr);
+      int tc=1;
+      scanf("%d",&tc);
+      while(tc--)
       {
-
-        printf("Case %d:\n",cs++);
-        scan(n);
-        scan(q);
-        memset(segment,0,sizeof segment);
-        int cmd,x,y,val;
-        while(q--)
-        {
-
-        scan(cmd);
-        scan(x);
-        scan(y);
-        if(0==cmd)
-        {
-          scan(val);
-          update(1,n,x+1,y+1,1,val);
-        }
-        else
-        {
-          ll ans=Query(1,n,x+1,y+1,1,0);
-          printf("%lld\n",ans);
-        }
-
-        } /// end query
-        
+            HalfDead();
       }
-    return 0;
+      return 0;
 }
