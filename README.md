@@ -11,3 +11,4 @@ string using hash function . Sample problem is lightoj : 1255 - Substring Freque
 
 6. Segment tree lazyPropagration is added to find sum between [l,r] and update between [l,r] with log(n) time
 7. MOs algorithm complexity O( (N+M) * sqrt N )
+8. Max flow contains basic maxflow implementation
